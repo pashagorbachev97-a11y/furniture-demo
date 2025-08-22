@@ -1,168 +1,67 @@
-
 <!doctype html>
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WebAR Demo — Галерея мебели</title>
+  <title>WebAR Demo — Мебель и Игрушка</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
-    :root { --bg:#0b0f17; --fg:#e6e9f2; --muted:#9aa3b2; --card:#121826; --accent:#7cd4fd; --ok:#5dd39e; --err:#ff6b6b; }
-    body{margin:0; font-family: system-ui, sans-serif; background:var(--bg); color:var(--fg);}    
-    .wrap{max-width:1100px; margin:0 auto; padding:24px;}
-    header{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0;}
-    .brand{font-weight:700;}
-    .card{background:var(--card); border-radius:20px; padding:16px; box-shadow: 0 10px 30px rgba(0,0,0,.35);}    
-    model-viewer{width:100%; height:70vh; background: radial-gradient(1200px 600px at 50% 0%, rgba(124,212,253,.08), rgba(0,0,0,0)); border-radius:16px;}
-    .gallery{display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:12px;}
-    .thumb{cursor:pointer; padding:8px; border-radius:14px; border:1px solid #273149; background:#111827; text-align:center; position:relative;}
-    .thumb:hover{border-color:var(--accent)}
-    .thumb img{width:100%; border-radius:10px; display:block}
-    .thumb span{display:block; margin-top:6px; font-size:.9rem; color:var(--muted);}    
-    .btn{cursor:pointer; padding:6px 10px; border-radius:10px; background:var(--accent); color:#07131b; font-weight:600; margin:2px; border:none; font-size:.8rem;}
-    .btn.secondary{background:#1b2539; color:var(--fg); border:1px solid #273149}
-    .hint{color:var(--muted); font-size:.9rem}
-    .drop{border:1px dashed #2a3550; border-radius:14px; padding:10px; text-align:center; margin-top:10px}
-    .kbd{font-family: monospace; background:#1b2539; border:1px solid #273149; padding:0 6px; border-radius:6px}
-    .tests{margin-top:18px; border-top:1px solid #273149; padding-top:12px}
-    .test-result{padding:6px 10px; border-radius:10px; background:#101725; border:1px solid #273149; margin-top:6px}
-    .add-btn{margin-top:10px; display:block;}
+    body { margin:0; font-family: sans-serif; background:#0b0f17; color:#fff; }
+    .wrap { max-width:1100px; margin:0 auto; padding:20px; }
+    header { font-size:1.4rem; font-weight:bold; margin-bottom:12px; }
+    model-viewer { width:100%; height:70vh; border-radius:16px; background:#121826; }
+    .gallery { display:flex; gap:16px; flex-wrap:wrap; margin-top:20px; }
+    .thumb { flex:1 1 200px; background:#121826; border-radius:12px; cursor:pointer; padding:10px; text-align:center; }
+    .thumb img { width:100%; border-radius:8px; }
+    .thumb span { display:block; margin-top:6px; }
+    .btn-ar { appearance:none; cursor:pointer; border:0; padding:10px 14px; border-radius:12px; background:#7cd4fd; color:#07131b; font-weight:600; margin:10px auto; display:block; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <div class="brand">WebAR Demo · Галерея мебели</div>
-      <div class="hint">Загружайте свои модели локально, если нет хостинга.</div>
-    </header>
+    <header>WebAR Demo · Галерея</header>
 
-    <div class="card">
-      <!-- Галерея -->
-      <div id="gallery" class="gallery"></div>
-      <button class="btn add-btn" onclick="addModelCard()">+ Добавить модель</button>
+    <model-viewer id="viewer"
+      src="models/table.glb"
+      ios-src="models/table.usdz"
+      alt="Стол"
+      ar ar-modes="quick-look scene-viewer webxr"
+      camera-controls
+      auto-rotate>
+      <button class="btn-ar" slot="ar-button">Показать в комнате (AR)</button>
+    </model-viewer>
 
-      <!-- Viewer -->
-      <model-viewer id="viewer"
-        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
-        ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
-        alt="Демо (Astronaut)"
-        ar ar-modes="quick-look scene-viewer webxr"
-        camera-controls auto-rotate
-        shadow-intensity="1">
-        <button class="btn" slot="ar-button">Показать в комнате</button>
-      </model-viewer>
-      <model-viewer id="viewer"
-        src="models/armchair.glb"
-        ios-src="models/armchair.usdz"
-        alt="images/armchair.jpg (CHAIR)"
-        ar ar-modes="quick-look scene-viewer webxr"
-        camera-controls auto-rotate
-        shadow-intensity="1">
-        <button class="btn" slot="ar-button">Показать в комнате</button>
-      </model-viewer>
-
-     
-
-
-      <!-- Drag & Drop -->
-      <div id="dropZone" class="drop">Перетащите сюда <span class="kbd">.glb</span> или <span class="kbd">.usdz</span></div>
-
-      <!-- Тесты -->
-      <div class="tests">
-        <button class="btn" onclick="runTestDemo()">Тест 1: Демо модель</button>
-        <button class="btn" onclick="runTestLocal()">Тест 2: Локальная модель</button>
-        <div id="testResults"></div>
-      </div>
-    </div>
+    <div class="gallery" id="gallery"></div>
   </div>
 
-<script>
-  const viewer = document.getElementById('viewer');
-  const gallery = document.getElementById('gallery');
-  const dropZone = document.getElementById('dropZone');
-  const testResults = document.getElementById('testResults');
+  <script>
+    const models = [
+      { name: "Стол", glb: "models/table.glb", usdz: "models/table.usdz", preview: "images/table.jpg" },
+      { name: "Кресло", glb: "models/armchair.glb", usdz: "models/armchair.usdz", preview: "images/armchair.jpg" },
+      { name: "Диван", glb: "models/sofa.glb", usdz: "models/sofa.usdz", preview: "images/sofa.jpg" },
+      { name: "Мягкая игрушка", glb: "models/toy.glb", usdz: "models/toy.usdz", preview: "images/toy.jpg" }
+    ];
 
-  function createCard(title){
-    const id = Date.now();
-    const card = document.createElement('div');
-    card.className = 'thumb';
-    card.innerHTML = `
-      <img id="prev-${id}" alt="${title}" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='180'><rect width='100%' height='100%' rx='14' fill='%23161d31'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%239aa3b2' font-family='Arial' font-size='16'>${title}</text></svg>">
-      <span>${title}</span>
-      <div>
-        <input id="glb-${id}" type="file" accept=".glb,.gltf" hidden>
-        <input id="usdz-${id}" type="file" accept=".usdz" hidden>
-        <input id="prevFile-${id}" type="file" accept="image/*" hidden>
-        <button class="btn secondary" onclick="document.getElementById('glb-${id}').click()">GLB</button>
-        <button class="btn secondary" onclick="document.getElementById('usdz-${id}').click()">USDZ</button>
-        <button class="btn secondary" onclick="document.getElementById('prevFile-${id}').click()">Превью</button>
-      </div>
-    `;
+    const viewer = document.getElementById("viewer");
+    const gallery = document.getElementById("gallery");
 
-    let glbUrl = null;
-    let usdzUrl = null;
-
-    card.onclick = (e) => {
-      if(!e.target.matches('button,input')){
-        if(glbUrl){ viewer.src = glbUrl; }
-        if(usdzUrl){ viewer.iosSrc = usdzUrl; }
-        viewer.alt = title;
-      }
-    };
-
-    card.querySelector(`#glb-${id}`).addEventListener('change', e => {
-      const file = e.target.files[0];
-      if(file){ glbUrl = URL.createObjectURL(file); }
-    });
-
-    card.querySelector(`#usdz-${id}`).addEventListener('change', e => {
-      const file = e.target.files[0];
-      if(file){ usdzUrl = URL.createObjectURL(file); }
-    });
-
-    card.querySelector(`#prevFile-${id}`).addEventListener('change', e => {
-      const file = e.target.files[0];
-      if(file){
-        const img = card.querySelector(`#prev-${id}`);
-        img.src = URL.createObjectURL(file);
-      }
-    });
-
-    gallery.appendChild(card);
-  }
-
-  function addModelCard(){
-    const title = prompt('Введите название модели', 'Новая модель');
-    if(title){ createCard(title); }
-  }
-
-  // Изначально 3 карточки
-  createCard('Кресло');
-  createCard('Стол');
-  createCard('Диван');
-
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = '#7cd4fd'; });
-  dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.style.borderColor = '#2a3550'; });
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.style.borderColor = '#2a3550';
-    for(const file of e.dataTransfer.files){
-      if(file.name.endsWith('.glb')||file.name.endsWith('.gltf')){
-        viewer.src = URL.createObjectURL(file);
-      }
-      if(file.name.endsWith('.usdz')){
-        viewer.iosSrc = URL.createObjectURL(file);
-      }
+    function loadModel(model) {
+      viewer.src = model.glb;
+      viewer.setAttribute("ios-src", model.usdz);
+      viewer.alt = model.name;
     }
-  });
 
-  // Тесты
-  function runTestDemo(){
-    testResults.innerHTML += `<div class='test-result'>Демо модель загружена: ${viewer.src.includes('Astronaut')?'OK':'FAIL'}</div>`;
-  }
-  function runTestLocal(){
-    testResults.innerHTML += `<div class='test-result'>Локальная модель: ${viewer.src.startsWith('blob:')?'OK':'FAIL'}</div>`;
-  }
-</script>
+    // Заполняем галерею
+    models.forEach(model => {
+      const div = document.createElement("div");
+      div.className = "thumb";
+      div.innerHTML = `
+        <img src="${model.preview}" alt="${model.name}">
+        <span>${model.name}</span>
+      `;
+      div.onclick = () => loadModel(model);
+      gallery.appendChild(div);
+    });
+  </script>
 </body>
 </html>
