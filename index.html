@@ -51,6 +51,18 @@
         shadow-intensity="1">
         <button class="btn" slot="ar-button">Показать в комнате</button>
       </model-viewer>
+      <model-viewer id="viewer"
+        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+        ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
+        alt="Демо (Astronaut)"
+        ar ar-modes="quick-look scene-viewer webxr"
+        camera-controls auto-rotate
+        shadow-intensity="1">
+        <button class="btn" slot="ar-button">Показать в комнате</button>
+      </model-viewer>
+
+     
+
 
       <!-- Drag & Drop -->
       <div id="dropZone" class="drop">Перетащите сюда <span class="kbd">.glb</span> или <span class="kbd">.usdz</span></div>
