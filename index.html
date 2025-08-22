@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ru">
 <head>
@@ -13,18 +14,19 @@
     .brand{font-weight:700;}
     .card{background:var(--card); border-radius:20px; padding:16px; box-shadow: 0 10px 30px rgba(0,0,0,.35);}    
     model-viewer{width:100%; height:70vh; background: radial-gradient(1200px 600px at 50% 0%, rgba(124,212,253,.08), rgba(0,0,0,0)); border-radius:16px;}
-    .gallery{display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:12px;}
-    .thumb{cursor:pointer; padding:8px; border-radius:14px; border:1px solid #273149; background:#111827; text-align:center;}
+    .gallery{display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:12px;}
+    .thumb{cursor:pointer; padding:8px; border-radius:14px; border:1px solid #273149; background:#111827; text-align:center; position:relative;}
     .thumb:hover{border-color:var(--accent)}
     .thumb img{width:100%; border-radius:10px; display:block}
     .thumb span{display:block; margin-top:6px; font-size:.9rem; color:var(--muted);}    
-    .btn{cursor:pointer; padding:10px 14px; border-radius:12px; background:var(--accent); color:#07131b; font-weight:600; margin:4px; border:none;}
+    .btn{cursor:pointer; padding:6px 10px; border-radius:10px; background:var(--accent); color:#07131b; font-weight:600; margin:2px; border:none; font-size:.8rem;}
     .btn.secondary{background:#1b2539; color:var(--fg); border:1px solid #273149}
     .hint{color:var(--muted); font-size:.9rem}
     .drop{border:1px dashed #2a3550; border-radius:14px; padding:10px; text-align:center; margin-top:10px}
     .kbd{font-family: monospace; background:#1b2539; border:1px solid #273149; padding:0 6px; border-radius:6px}
     .tests{margin-top:18px; border-top:1px solid #273149; padding-top:12px}
     .test-result{padding:6px 10px; border-radius:10px; background:#101725; border:1px solid #273149; margin-top:6px}
+    .add-btn{margin-top:10px; display:block;}
   </style>
 </head>
 <body>
@@ -36,29 +38,8 @@
 
     <div class="card">
       <!-- Галерея -->
-      <div class="gallery">
-        <!-- Демо-модель (Astronaut, всегда работает) -->
-        <div class="thumb" onclick="loadModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb','https://modelviewer.dev/shared-assets/models/Astronaut.usdz','Демо (Astronaut)')">
-          <img alt="Демо превью" src="https://modelviewer.dev/shared-assets/models/thumbnails/Astronaut.webp">
-          <span>Демо (надежно)</span>
-        </div>
-
-        <!-- Кресло: выбор файла -->
-        <label class="thumb">
-          <input id="fileGlb" type="file" accept=".glb,.gltf" hidden>
-          <input id="fileUsdz" type="file" accept=".usdz" hidden>
-          <img alt="Кресло превью" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='180'><rect width='100%' height='100%' rx='14' fill='%231d2740'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%239aa3b2' font-family='Arial' font-size='16'>Загрузить кресло</text></svg>">
-          <span>Кресло (загрузить)</span>
-          <div>
-            <button class="btn secondary" type="button" onclick="document.getElementById('fileGlb').click()">GLB</button>
-            <button class="btn secondary" type="button" onclick="document.getElementById('fileUsdz').click()">USDZ</button>
-          </div>
-        </label>
-
-        <!-- Плейсхолдеры -->
-        <div class="thumb"><img alt="Стол" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='180'><rect width='100%' height='100%' rx='14' fill='%23161d31'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23778796' font-family='Arial' font-size='16'>Стол (скоро)</text></svg>"><span>Стол (скоро)</span></div>
-        <div class="thumb"><img alt="Диван" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='180'><rect width='100%' height='100%' rx='14' fill='%23161d31'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23778796' font-family='Arial' font-size='16'>Диван (скоро)</text></svg>"><span>Диван (скоро)</span></div>
-      </div>
+      <div id="gallery" class="gallery"></div>
+      <button class="btn add-btn" onclick="addModelCard()">+ Добавить модель</button>
 
       <!-- Viewer -->
       <model-viewer id="viewer"
@@ -85,30 +66,68 @@
 
 <script>
   const viewer = document.getElementById('viewer');
-  const fileGlb = document.getElementById('fileGlb');
-  const fileUsdz = document.getElementById('fileUsdz');
+  const gallery = document.getElementById('gallery');
   const dropZone = document.getElementById('dropZone');
   const testResults = document.getElementById('testResults');
 
-  function loadModel(glb, usdz, title){
-    viewer.src = glb;
-    viewer.iosSrc = usdz;
-    viewer.alt = title;
+  function createCard(title){
+    const id = Date.now();
+    const card = document.createElement('div');
+    card.className = 'thumb';
+    card.innerHTML = `
+      <img id="prev-${id}" alt="${title}" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='180'><rect width='100%' height='100%' rx='14' fill='%23161d31'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%239aa3b2' font-family='Arial' font-size='16'>${title}</text></svg>">
+      <span>${title}</span>
+      <div>
+        <input id="glb-${id}" type="file" accept=".glb,.gltf" hidden>
+        <input id="usdz-${id}" type="file" accept=".usdz" hidden>
+        <input id="prevFile-${id}" type="file" accept="image/*" hidden>
+        <button class="btn secondary" onclick="document.getElementById('glb-${id}').click()">GLB</button>
+        <button class="btn secondary" onclick="document.getElementById('usdz-${id}').click()">USDZ</button>
+        <button class="btn secondary" onclick="document.getElementById('prevFile-${id}').click()">Превью</button>
+      </div>
+    `;
+
+    let glbUrl = null;
+    let usdzUrl = null;
+
+    card.onclick = (e) => {
+      if(!e.target.matches('button,input')){
+        if(glbUrl){ viewer.src = glbUrl; }
+        if(usdzUrl){ viewer.iosSrc = usdzUrl; }
+        viewer.alt = title;
+      }
+    };
+
+    card.querySelector(`#glb-${id}`).addEventListener('change', e => {
+      const file = e.target.files[0];
+      if(file){ glbUrl = URL.createObjectURL(file); }
+    });
+
+    card.querySelector(`#usdz-${id}`).addEventListener('change', e => {
+      const file = e.target.files[0];
+      if(file){ usdzUrl = URL.createObjectURL(file); }
+    });
+
+    card.querySelector(`#prevFile-${id}`).addEventListener('change', e => {
+      const file = e.target.files[0];
+      if(file){
+        const img = card.querySelector(`#prev-${id}`);
+        img.src = URL.createObjectURL(file);
+      }
+    });
+
+    gallery.appendChild(card);
   }
 
-  fileGlb.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if(file){
-      viewer.src = URL.createObjectURL(file);
-    }
-  });
+  function addModelCard(){
+    const title = prompt('Введите название модели', 'Новая модель');
+    if(title){ createCard(title); }
+  }
 
-  fileUsdz.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if(file){
-      viewer.iosSrc = URL.createObjectURL(file);
-    }
-  });
+  // Изначально 3 карточки
+  createCard('Кресло');
+  createCard('Стол');
+  createCard('Диван');
 
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = '#7cd4fd'; });
   dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.style.borderColor = '#2a3550'; });
