@@ -11,12 +11,30 @@
     header { font-size:1.4rem; font-weight:bold; margin-bottom:12px; }
     model-viewer { width:100%; height:70vh; border-radius:16px; background:#121826; }
     .gallery { display:flex; gap:16px; flex-wrap:wrap; margin-top:20px; }
-    .thumb { flex:1 1 200px; background:#121826; border-radius:12px; cursor:pointer; padding:10px; text-align:center; transition:0.3s; border:2px solid transparent; }
+    .thumb {
+      flex:1 1 200px;
+      background:#121826;
+      border-radius:12px;
+      cursor:pointer;
+      padding:10px;
+      text-align:center;
+      transition:0.3s;
+      border:3px solid transparent;
+    }
     .thumb:hover { background:#1b2233; }
     .thumb img { width:100%; border-radius:8px; }
     .thumb span { display:block; margin-top:6px; }
-    .thumb.active { border:2px solid #3ba9ff; background:#162032; }
-    .btn-ar { appearance:none; cursor:pointer; border:0; padding:10px 14px; border-radius:12px; background:#7cd4fd; color:#07131b; font-weight:600; margin:10px auto; display:block; }
+    .thumb.active {
+      border:3px solid #00c8ff;
+      background:#162032;
+      box-shadow: 0 0 12px #00c8ff;
+    }
+    .btn-ar {
+      appearance:none; cursor:pointer; border:0;
+      padding:10px 14px; border-radius:12px;
+      background:#7cd4fd; color:#07131b;
+      font-weight:600; margin:10px auto; display:block;
+    }
   </style>
 </head>
 <body>
